@@ -1,97 +1,100 @@
+<main class="container py-5">
+    <h1>Meme-o-Gram</h1>
+    <p class="lead">Rate your memes</p>
 
-{{!-- section --}}
-    <section class="section my-4">
-        <div class="container text-center">
-            <div class="title py-5">
-                <h1>Meme Rater</h1>
-                <p class="subtitle">Upload Meme (as images) to the <strong>Server</strong></p>
+
+
+    <hr class="my-5">
+
+    <div class="row justify-content-center">
+        <div class="card col-md-4">
+            <div class="card-body">
+                <form action=" /uploadmultiple" enctype="multipart/form-data" method="POST">
+                    <div class="mb-3">
+                        <label for="images" class="form-label">Upload Meme</label>
+                        <input class="form-control" type="file" name="images" id="images" multiple required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" name="username" id="username" required class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label for="caption" class="form-label">Caption</label>
+                        <textarea class="form-control" id="caption" name="caption" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">Submit</button>
+                </form>
             </div>
+        </div>
+    </div>
 
-            <div class="row justify-content-center">
-                <div class="col-4">
-                    <form action="/uploadmultiple" enctype="multipart/form-data" method="POST">
-                    
-                        <div class = "row">
-                            <div class = "col-8">
-                                <input type = "text" class = "form-control" name = "username" id = "username" required>
-                                <label>Enter username</label>
-                            </div>
-                        </div>
 
-                        <div class="row">
-                            <div class="col-8">
-                                <input type="file" class="form-control" name="images" id="formFile" multiple>
-                            </div>
-                        </div>
-                        <div class = "row">
-                            <div class="col-2">
-                                <input type="submit" class="btn btn-warning" value="Upload Meme">
-                            </div>
-                        </div>
-                        </div>
-                    </form>
+    <hr class="my-5">
+    <div class="row" data-masonry='{"percentPosition": true }'>
+        {{#each images}}
+        {{#each this}}
+        {{#if imageBase64 }}
+        <div class="col-sm-6 col-lg-4 mb-4">
+            <div class="card">
+                <img src='data:{{contentType}};base64,{{imageBase64}}' alt="..." style="width: 100%; height: 200">
+
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ this.username }}</h5>
+                    <p class="card-text">{{ this.caption }}
+                    </p>
+                    <p class="card-text"><small class="text-muted">Posted 3 mins ago</small></p>
+                    <button type="button" onclick="actOnPost(event);" data-post-id="{{ this._id }}"
+                        class="btn btn-outline-primary btn-sm"><i class="fa fa-thumbs-o-up"></i>
+                        Upvote </button>
+                    <span id="Upvote-count-{{ this._id }}" class="badge bg-primary">{{ this.upvotes
+                        }}</span>
+                    <button type="button" onclick="actOnPost(event);" data-post-id="{{ this._id }}"
+                        class="btn btn-outline-danger btn-sm">
+                        <i class="fa fa-thumbs-o-down"></i>
+                        Downvote
+                    </button>
+                    <span id="Downvote-count-{{ this._id }}" class="badge bg-danger">{{ this.downvotes
+                        }}</span>
                 </div>
             </div>
-
-            {{!-- display images --}}
-                <section class="mt-5">
-                    <div class="row justify-content-center" >
-                            {{#each images}} 
-                                {{#each this}}
-                                    {{#if imageBase64 }}
-                                        {{!-- bootstrap cads --}}
-                                            <div class="col-3">
-                                                    <div class="card shadow" style="width: 18rem;">
-                                                        <h3>{{test_var}}</h3>
-                                                        <img src='data:{{contentType}};base64,{{imageBase64}}' class="card-img-top" class="img-fluid" alt="...">
-                                                        <div class="card-body">
-                                                            <h5 class="card-title font-poppins"> {{ this.username }}</h5>
-                                                            
-                                                            {{!-- <p class="text-secondary font-size-09">Some quick example text to build on the card title and make up the bulk of the card's content.</p> --}}
-                                                            <button onclick = "actOnPost(event);" data-post-id = "{{ this._id }}" class="btn btn-info font-size-04 text-light">Upvote</button>
-                                                            <span id="Upvote-count-{{ this._id }}">{{ this.upvotes }}</span>
-                                                           
-                                                            <button onclick = "actOnPost(event);" data-post-id = "{{ this._id }}" class="btn btn-info font-size-04 text-light">Downvote</button>
-                                                            <span id="Downvote-count-{{ this._id }}">{{ this.downvotes }}</span>
-                                                        </div>
-                                                    </div>
-                                            </div>
-                                        {{!-- /bootstrap cards --}}
-                                    {{/if}}
-                                 {{/each}}
-                                 {{/each}}
-                    </div>
-                </section>
-            {{!-- /display images --}}
-
         </div>
-    </section>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script>
-        var updatePostStats = {
-            Upvote: function (postId) {
-                document.querySelector('#Upvote-count-' + postId).textContent++;
-            },
-            Downvote: function(postId) {
-                document.querySelector('#Downvote-count-' + postId).textContent++;
-            }
-        };
-    
-        var toggleButtonText = {
-            Upvote: function(button) {
-                button.textContent = "Upvote";
-            },
-            Downvote: function(button) {
-                button.textContent = "Downvote";
-            }
-        };
-    
-        var actOnPost = function (event) {
-            var postId = event.target.dataset.postId;
-            var action = event.target.textContent.trim();
-            toggleButtonText[action](event.target);
-            updatePostStats[action](postId);
-            axios.post('posts/' + postId + '/act', {action: action});
-        };
-    </script>
-{{!-- /section --}}
+        {{/if}}
+        {{/each}}
+        {{/each}}
+
+    </div>
+
+</main>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var updatePostStats = {
+        Upvote: function (postId) {
+            document.querySelector('#Upvote-count-' + postId).textContent++;
+        },
+        Downvote: function (postId) {
+            let spanId = "Downvote-count-" + postId;
+            document.querySelector('#Downvote-count-' + postId).textContent++;
+        }
+    };
+
+    var toggleButtonText = {
+        Upvote: function (button) {
+            button.textContent = "Upvote";
+        },
+        Downvote: function (button) {
+            button.textContent = "Downvote";
+        }
+    };
+
+    var actOnPost = function (event) {
+        var postId = event.target.dataset.postId;
+        var action = event.target.textContent.replace(/[0-9]/g, '').trim();
+        console.log(action);
+        //console.log(event.target);
+        //toggleButtonText[action](event.target);
+        updatePostStats[action](postId);
+        axios.post('posts/' + postId + '/act', { action: action });
+    };
+</script>
