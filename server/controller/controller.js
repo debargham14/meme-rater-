@@ -6,12 +6,26 @@ exports.home = async (req, res) => {
     res.render ('main', {images: all_images});
 }
 
-exports.updateUpvotes = async (req, res) => {
-    
+//to update the upvote count in the meme
+exports.updateVotes = (req, res, next) => {
+    // console.log ('I am here');
+    const action = req.body.action;
+    if(action == 'Upvote'){
+        UploadModel.updateOne({_id: req.params.id}, {$inc: {upvotes: 1}}, {}, (err, numberAffected) => {
+            res.send('');
+        });
+    }
+    else {
+        UploadModel.updateOne({_id: req.params.id}, {$inc: {downvotes: 1}}, {}, (err, numberAffected) => {
+            res.send('');
+        });
+    }
 }
+
 
 exports.uploads = (req, res, next) => {
     const files = req.files;
+    const username = req.body.username;
     if(!files){
         const error = new Error('please choose files');
         error.httpStatusCode = 400;
@@ -27,6 +41,7 @@ exports.uploads = (req, res, next) => {
     let result = imgArray.map((src, index) => {
         //create object to store data in the database
         let finalImg = {
+            username: username,
             filename: files[index].originalname,
             contentType: files[index].mimetype,
             imageBase64: src

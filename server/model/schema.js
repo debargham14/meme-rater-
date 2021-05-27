@@ -2,6 +2,11 @@ const mongoose = require('mongoose');
 
 //schema to hold the memes
 const uploadSchema = new mongoose.Schema ({
+    username: {
+        type: String, 
+        required: true,
+    },
+    
     filename : {
         type: String, 
         unique: true,
