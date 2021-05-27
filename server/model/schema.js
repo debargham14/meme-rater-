@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-
+//schema to hold the memes
 const uploadSchema = new mongoose.Schema ({
     filename : {
         type: String, 
@@ -14,7 +14,17 @@ const uploadSchema = new mongoose.Schema ({
     imageBase64 : {
         type : String, 
         required : true
-    }
+    },
+    upvotes: {
+        type: Number,
+        required: true,
+        default: 0
+    },
+    downvotes: {
+        type: Number,
+        required: true,
+        default: 0
+    }    
 })
 
 module.exports = UploadModel = mongoose.model ('uploads', uploadSchema);

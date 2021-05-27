@@ -6,6 +6,10 @@ exports.home = async (req, res) => {
     res.render ('main', {images: all_images});
 }
 
+exports.updateUpvotes = async (req, res) => {
+    
+}
+
 exports.uploads = (req, res, next) => {
     const files = req.files;
     if(!files){
