@@ -22,12 +22,10 @@ app.engine ('hbs', hbs({
     partialDir: path.join (__dirname, 'views')
 }));
 
-// //routes
-// app.get ('/', (req, res) => {
-//     res.render('main');
-// });
+
 
 //calling routes
 app.use ('/', require ('./server/router/router'));
+
 
 app.listen(3001, () => console.log(`Server is stated on http://localhost:3001`));
