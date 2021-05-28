@@ -1,8 +1,9 @@
 const UploadModel = require("../model/schema");
 const fs = require("fs");
 
+//will return the images according to latest arrival
 exports.home = async (req, res) => {
-  const all_images = await UploadModel.find();
+  const all_images = await UploadModel.find().sort({postedon: -1});
   res.render("main", { images: all_images });
 };
 
