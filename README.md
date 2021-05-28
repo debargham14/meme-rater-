@@ -1,9 +1,6 @@
 # meme-rater-
 meme rater using node js 
 
-Steps to Run: 
-1. Clone this repo
-2. Go to the repo
-3. npm install (for installing the dependencies)
-4. nodemon server.js
-5. observe changes in port 3001
+![Screenshot from 2021-05-28 14-07-57](https://user-images.githubusercontent.com/56204372/119955940-2fb4c680-bfbe-11eb-8819-ad5e1d2c8beb.png)
+
+Enjoy it on https://meme-o-gram.herokuapp.com
