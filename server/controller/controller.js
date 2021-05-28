@@ -1,5 +1,14 @@
 const UploadModel = require("../model/schema");
 const fs = require("fs");
+const Pusher = require ('pusher');
+
+//creating the new pusher 
+const pusher = new Pusher ({
+  appId: process.env.PUSHER_APP_ID,
+  key: process.env.PUSHER_APP_KEY,
+  secret: process.env.PUSHER_APP_SECRET,
+  cluster: process.env.PUSHER_APP_CLUSTER
+});
 
 //will return the images according to latest arrival
 exports.home = async (req, res) => {
@@ -7,25 +16,27 @@ exports.home = async (req, res) => {
   res.render("main", { images: all_images });
 };
 
-//to update the upvote count in the meme
+
+//to update the upvote count in the meme and the notify other clients involved about the change
 exports.updateVotes = (req, res, next) => {
-  // console.log ('I am here');
   const action = req.body.action;
-  if (action == "Upvote") {
+  if (action == "Upvote") { //increment the count of the upvotes  
     UploadModel.updateOne(
-      { _id: req.params.id },
+      { _id: req.params.id }, 
       { $inc: { upvotes: 1 } },
       {},
-      (err, numberAffected) => {
-        res.send("");
+      (err, numberAffected) => { //generating a trigger to let other connected nodes about the change
+        pusher.trigger('post-events', 'postAction', {action: action, postId: req.params.id}, req.body.socketId);
+        res.send ('');
       }
     );
-  } else {
+  } else { //increment the count of downvotes
     UploadModel.updateOne(
       { _id: req.params.id },
       { $inc: { downvotes: 1 } },
       {},
-      (err, numberAffected) => {
+      (err, numberAffected) => { //generating a pusher trigger 
+        pusher.trigger('post-events', 'postAction', {action: action, postId: req.params.id}, req.body.socketId);
         res.send("");
       }
     );

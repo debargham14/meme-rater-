@@ -94,8 +94,30 @@
         var action = event.target.textContent.replace(/[0-9]/g, '').trim();
         console.log(action);
         //console.log(event.target);
-        //toggleButtonText[action](event.target);
-        updatePostStats[action](postId);
-        axios.post('posts/' + postId + '/act', { action: action });
+        toggleButtonText[action](event.target);
+        //updatePostStats[action](postId);
+        axios.post('posts/' + postId + '/act', { action: action, socketId: socketId });
     };
+</script>
+<script src="https://js.pusher.com/4.1/pusher.min.js"></script>
+<script>
+     var pusher = new Pusher('26dd07dc156acae4c8b3', {
+            cluster: 'ap2'
+        });
+        var socketId;
+    
+        // retrieve the socket ID on successful connection
+        pusher.connection.bind('connected', function() {
+            socketId = pusher.connection.socket_id;
+        });
+    
+    
+        var channel = pusher.subscribe('post-events');
+        channel.bind('postAction', function(data) {
+            // log message data to console - for debugging purposes
+            //so the problem lies in fetching the postId of the data 
+            console.log(data);
+            var action = data.action;
+            updatePostStats[action](data.postId);
+        });
 </script>
