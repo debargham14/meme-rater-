@@ -29,7 +29,7 @@ app.engine(
 //calling routes
 app.use("/", require("./server/router/router"));
 
-var port = process.env.PORT || 3001;
+var port = process.env.PORT || 8080;
 app.listen(port, () =>
   console.log(`Server is stated on http://localhost:${port}`)
 );

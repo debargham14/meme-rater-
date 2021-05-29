@@ -12,10 +12,22 @@ const pusher = new Pusher ({
 
 //will return the images according to latest arrival
 exports.home = async (req, res) => {
+  
   const all_images = await UploadModel.find().sort({postedon: -1});
   res.render("main", { images: all_images });
 };
 
+//will return images according to upvote count (high - low)
+exports.orderByUpvotes = async (req, res) => {  
+  const all_images = await UploadModel.find().sort({upvotes: -1});
+  res.render("main", { images: all_images });
+};
+
+//will return images according to downvote count (low - high)
+exports.orderByDownvotes = async (req, res) => {  
+  const all_images = await UploadModel.find().sort({downvotes: 1});
+  res.render("main", { images: all_images });
+};
 
 //to update the upvote count in the meme and the notify other clients involved about the change
 exports.updateVotes = (req, res, next) => {

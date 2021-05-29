@@ -28,7 +28,20 @@
         </div>
     </div>
 
+        
+    <div class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+           Sort By
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            <a class="dropdown-item" href="/orderbyupvotes">Upvotes (high - low)</a>
+            <a class="dropdown-item" href="/orderbydownvotes">Downvotes (low - high)</a>
+            <a class="dropdown-item" href="/">Posted On (latest Arrival)</a>
+        </div>
+    </div>
+   
 
+  
     <hr class="my-5">
     <div class="row" data-masonry='{"percentPosition": true }'>
         {{#each images}}
@@ -69,7 +82,7 @@
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script>
-
+   
     var updatePostStats = {
         Upvote: function (postId) {
             document.querySelector('#Upvote-count-' + postId).textContent++;
@@ -121,3 +134,6 @@
             updatePostStats[action](data.postId);
         });
 </script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
