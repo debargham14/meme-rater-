@@ -1,6 +1,8 @@
 const UploadModel = require("../model/schema");
 const fs = require("fs");
 const Pusher = require ('pusher');
+const cloudinary = require ('cloudinary').v2;
+let test;
 
 //creating the new pusher 
 const pusher = new Pusher ({
@@ -12,9 +14,10 @@ const pusher = new Pusher ({
 
 //will return the images according to latest arrival
 exports.home = async (req, res) => {
-  
   const all_images = await UploadModel.find().sort({postedon: -1});
+  
   res.render("main", { images: all_images });
+  // res.status(200).json ({data: all_images});
 };
 
 //will return images according to upvote count (high - low)
@@ -64,48 +67,46 @@ exports.uploads = (req, res, next) => {
     error.httpStatusCode = 400;
     return next(error);
   }
-
+  cloudinary.config ({
+      cloud_name: 'meme-o-gram',
+      api_key: '953418367462681',
+      api_secret: 'l1ri-DEF76EW9dm5cIRUjSphD8M'
+  })
   //convert images into base64 encoding
-  let imgArray = files.map((file) => {
-    let img = fs.readFileSync(file.path);
-    return (encode_image = img.toString("base64"));
-  });
-
-  let result = imgArray.map((src, index) => {
-    //create object to store data in the database
+  let imgArray =  files.map(async (file) => {
+      let img = fs.readFileSync(file.path);
+      test = await cloudinary.uploader.upload (file.path, (err, result) => {
+        console.log ("Error : ", err);
+        console.log ("Result :", result);
+    });
+    
     let finalImg = {
       username: username,
-      filename: files[index].originalname,
+      filename: file.originalname,
       caption: caption,
-      contentType: files[index].mimetype,
-      imageBase64: src,
+      contentType: file.mimetype,
+      imageSourceUrl: test.secure_url,
     };
     let newUpload = new UploadModel(finalImg);
     return newUpload
       .save()
       .then(() => {
-        return { msg: `${files[index].originalname} Uploaded Successfully..!` };
+        res.redirect ('/');
+        return { msg: `${file.originalname} Uploaded Successfully..!` };
       })
       .catch((error) => {
         if (error) {
           if (error.name === `MongoError` && error.code === 11000)
             return Promise.reject({
-              error: `Duplicate ${files[index].originalname}.file already exists...!`,
+              error: `Duplicate ${file.originalname}.file already exists...!`,
             });
         }
         return Promise.reject({
           error:
             error.message ||
-            `Cannot Upload ${files[index].originalname} something missing`,
+            `Cannot Upload ${file.originalname} something missing`,
         });
       });
+    
   });
-
-  Promise.all(result)
-    .then((msg) => {
-      res.redirect("/");
-    })
-    .catch((err) => {
-      res.json(err);
-    });
 };

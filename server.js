@@ -1,6 +1,9 @@
 //creating the http server using js
 const express = require("express");
+
+
 require ('dotenv').config();
+
 const app = express();
 
 const hbs = require("express-handlebars");
@@ -26,10 +29,13 @@ app.engine(
   })
 );
 
+var port = process.env.PORT || 8080;
+
 //calling routes
 app.use("/", require("./server/router/router"));
 
-var port = process.env.PORT || 8080;
+
+
 app.listen(port, () =>
   console.log(`Server is stated on http://localhost:${port}`)
 );

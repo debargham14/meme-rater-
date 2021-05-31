@@ -19,7 +19,7 @@ const uploadSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  imageBase64: {
+  imageSourceUrl: {
     type: String,
     required: true,
   },

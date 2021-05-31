@@ -46,11 +46,11 @@
     <div class="row" data-masonry='{"percentPosition": true }'>
         {{#each images}}
         {{#each this}}
-        {{#if imageBase64 }}
+        {{#if imageSourceUrl}}
         <div class="col-sm-6 col-lg-4 mb-4">
             <div class="card">
-                <img src='data:{{contentType}};base64,{{imageBase64}}' alt="..." style="width: 100%; height: 200">
-
+             <img src='{{ this.imageSourceUrl }}' alt="..." style="width: 100%; height: 200">
+                
 
                 <div class="card-body">
                     <h5 class="card-title">{{ this.username }}</h5>
