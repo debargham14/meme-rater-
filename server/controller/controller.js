@@ -17,25 +17,27 @@ const pusher = new Pusher({
 //to get the redis object
 function getRedis(key) {
   return new Promise((resolve, reject) => {
-    redis_client.get(key, (err, val) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-      if (val == null) {
-        resolve(null);
-        return;
-      }
 
-      try {
-        resolve(JSON.parse(val));
-      } catch (ex) {
-        resolve(val);
-      }
-      // redis_client.quit();
-    });
-  });
-}
+   redis_client.get(key, (err, val) => {
+    if (err) {
+     reject(err)
+     return
+    }
+    if (val == null) {
+     resolve(null)
+     return
+    }
+ 
+    try {
+     resolve(
+      JSON.parse(val)
+     )
+    } catch (ex) {
+     resolve(val)
+    }
+   })
+  })
+ }
 
 //function to get the images from the cache
 //takes the attribute for sorting and returns the array of sorted images
