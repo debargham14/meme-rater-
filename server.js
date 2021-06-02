@@ -29,7 +29,7 @@ app.engine(
   })
 );
 //setting up the redis port
-const port_redis = process.env.PORT || 6379;
+const port_redis = process.env.PORT || 5000;
 var port = process.env.PORT || 8080;
 
 //configuring the redis client on port 6379
