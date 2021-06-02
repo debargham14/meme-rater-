@@ -28,12 +28,14 @@ app.engine(
     partialDir: path.join(__dirname, "views"),
   })
 );
+
 //setting up the redis port
-var port_redis = process.env.PORT || 3001;
+const port_redis = process.env.PORT || 6379;
 var port = process.env.PORT || 8080;
 
 //configuring the redis client on port 6379
 const redis_client = redis.createClient (port_redis);
+console.log(redis_client);
 
 async function dataFetch () {
   const all_images = await UploadModel.find().sort({postedon: -1});
@@ -49,9 +51,7 @@ setInterval(async () => {
     let check = await dataFetch();
 }, 3000);
 
-function returnRedisClient () {
-  return redis_client;
-}
+
 exports.getRedisClient = function () {return redis_client;}
 //calling routes
 app.use("/", require("./server/router/router"));
