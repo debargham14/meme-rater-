@@ -35,6 +35,7 @@ function getRedis(key) {
     } catch (ex) {
      resolve(val)
     }
+    redis_client.quit();
    })
   })
  }
