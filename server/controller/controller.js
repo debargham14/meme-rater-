@@ -2,7 +2,10 @@ const UploadModel = require("../model/schema");
 const fs = require("fs");
 const Pusher = require ('pusher');
 const cloudinary = require ('cloudinary').v2;
-let test;
+const redis_client = require ('../../server').getRedisClient();
+
+let test; //to store the response generated after storing the image in cloudinary
+
 
 //creating the new pusher 
 const pusher = new Pusher ({
@@ -12,23 +15,75 @@ const pusher = new Pusher ({
   cluster: process.env.PUSHER_APP_CLUSTER
 });
 
+//to get the redis object
+function getRedis(key) {
+  return new Promise((resolve, reject) => {
+   redis_client.get(key, (err, val) => {
+    if (err) {
+     reject(err)
+     return
+    }
+    if (val == null) {
+     resolve(null)
+     return
+    }
+ 
+    try {
+     resolve(
+      JSON.parse(val)
+     )
+    } catch (ex) {
+     resolve(val)
+    }
+   })
+  })
+ }
+
+//function to get the images from the cache
+//takes the attribute for sorting and returns the array of sorted images 
+async function getImagesFromCache (property, order) {
+  let count = await getRedis('image_count');
+  //collect the images from the redis into images and return into the home page
+  let images = []
+  for(var key = 0; key < count; key++) {
+    let image = await getRedis(key);
+    images.push(image);
+  }
+
+  //sorting the images
+  if(order == 1){
+    images = images.sort((a, b) => {
+       return (a[property] - b[property]);
+    });
+  }
+  else {
+    images = images.sort((a, b) => {
+      return (b[property] - a[property]);
+   });
+  }
+  //modelling the image into an array of  mongoose object
+  const all_images = [];
+  for(var i = 0; i < images.length; i++) {
+      all_images.push(UploadModel(images[i]));
+  }
+  return all_images;
+}
+
 //will return the images according to latest arrival
 exports.home = async (req, res) => {
-  const all_images = await UploadModel.find().sort({postedon: -1});
-  
+  const all_images = await getImagesFromCache('postedon', 0);
   res.render("main", { images: all_images });
-  // res.status(200).json ({data: all_images});
 };
 
 //will return images according to upvote count (high - low)
 exports.orderByUpvotes = async (req, res) => {  
-  const all_images = await UploadModel.find().sort({upvotes: -1});
+  const all_images = await getImagesFromCache('upvotes', 0);
   res.render("main", { images: all_images });
 };
 
 //will return images according to downvote count (low - high)
 exports.orderByDownvotes = async (req, res) => {  
-  const all_images = await UploadModel.find().sort({downvotes: 1});
+  const all_images = await getImagesFromCache('downvotes', 1);
   res.render("main", { images: all_images });
 };
 
@@ -72,14 +127,13 @@ exports.uploads = (req, res, next) => {
       api_key: '953418367462681',
       api_secret: 'l1ri-DEF76EW9dm5cIRUjSphD8M'
   })
-  //convert images into base64 encoding
+  //upload the image url from cloudinary 
   let imgArray =  files.map(async (file) => {
       let img = fs.readFileSync(file.path);
       test = await cloudinary.uploader.upload (file.path, (err, result) => {
-        console.log ("Error : ", err);
-        console.log ("Result :", result);
+        //for debugging purposes
     });
-    
+    //modelling the mongoose object 
     let finalImg = {
       username: username,
       filename: file.originalname,

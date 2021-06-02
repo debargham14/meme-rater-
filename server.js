@@ -1,6 +1,6 @@
 //creating the http server using js
 const express = require("express");
-
+const redis = require ('redis');
 
 require ('dotenv').config();
 
@@ -28,14 +28,34 @@ app.engine(
     partialDir: path.join(__dirname, "views"),
   })
 );
-
+//setting up the redis port
+const port_redis = process.env.PORT || 6379;
 var port = process.env.PORT || 8080;
 
+//configuring the redis client on port 6379
+const redis_client = redis.createClient (port_redis);
+
+async function dataFetch () {
+  const all_images = await UploadModel.find().sort({postedon: -1});
+  for(var idx = 0; idx < Math.min(all_images.length, 10); idx++){
+    redis_client.setex (idx, 3600, JSON.stringify(all_images[idx]));
+  }
+  //to store the image count of the 
+  redis_client.setex ("image_count", 3600, Math.min(all_images.length, 10));
+  return 1;
+} 
+
+setInterval(async () => {
+    let check = await dataFetch();
+}, 3000);
+
+function returnRedisClient () {
+  return redis_client;
+}
+exports.getRedisClient = function () {return redis_client;}
 //calling routes
 app.use("/", require("./server/router/router"));
-
-
-
 app.listen(port, () =>
   console.log(`Server is stated on http://localhost:${port}`)
 );
+
