@@ -76,13 +76,13 @@ exports.home = async (req, res) => {
 
 //will return images according to upvote count (high - low)
 exports.orderByUpvotes = async (req, res) => {
-  const all_images = await getImagesFromCache("upvotes", 0);
+  const all_images = await UploadModel.find().sort({upvotes: -1});
   res.render("main", { images: all_images });
 };
 
 //will return images according to downvote count (low - high)
 exports.orderByDownvotes = async (req, res) => {
-  const all_images = await getImagesFromCache("downvotes", 1);
+  const all_images = await UploadModel.find().sort({downvotes: 1});
   res.render("main", { images: all_images });
 };
 
