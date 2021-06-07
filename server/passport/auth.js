@@ -11,5 +11,11 @@ module.exports = {
           return next();
         }
         res.redirect('/dashboard');      
+    },
+
+    backwardAuthenticated: function (req, res, next) {
+        if(req.isAuthenticated()) {
+            res.redirect('/signin');
+        }
     }
 }

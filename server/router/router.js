@@ -9,7 +9,7 @@ route.get("/register", forwardAuthenticated, (req, res) => res.render('register'
 route.post("/register", user.register);
 route.get("/signin", forwardAuthenticated, (req, res) => res.render('signin'));
 route.post("/signin", user.signin);
-route.get("/logout", user.logout);
+route.get("/logout", ensureAuthenticated, user.logout);
 
 //routes
 route.get("/dashboard", ensureAuthenticated ,controller.home);
