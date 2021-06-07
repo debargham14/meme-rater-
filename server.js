@@ -4,10 +4,18 @@ const redis = require("redis");
 
 require("dotenv").config();
 
-const app = express();
 
 const hbs = require("express-handlebars");
+const handlebars = require('hbs');
 const path = require("path");
+const passport = require('passport');
+const flash = require('connect-flash');
+const session = require('express-session');
+
+
+const app = express();
+
+require('./server/passport/passport')(passport);
 
 app.use(express.json()); //allows to post the json data when we make a post request
 
@@ -24,11 +32,36 @@ app.engine(
   "hbs",
   hbs({
     extname: "hbs",
-    defaultView: "default",
+    defaultLayout: false,
     layoutsDir: path.join(__dirname, "views"),
     partialDir: path.join(__dirname, "views"),
   })
 );
+
+//Bodyparser
+app.use(express.urlencoded({extended: false}));
+
+//Express session
+app.use(
+  session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+//connect flash
+app.use(flash());
+
+//Global variables
+app.use((req, res, next) => {
+  res.locals.success_msg = req.flash('success_msg');
+  res.locals.error_msg = req.flash('error_msg');
+  res.locals.error = req.flash('error');
+  next();
+});
 
 //setting up the redis port
 const port_redis = process.env.PORT || 6379;
