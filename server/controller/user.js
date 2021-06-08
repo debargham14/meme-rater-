@@ -13,8 +13,6 @@ handlebars.registerHelper("checkNotEmpty", function (v1) {
     return (v1 != '')
 });
 
-
-
 exports.register = (req, res) => {
     const {username, email, password, password2} = req.body;
     let errors =[];

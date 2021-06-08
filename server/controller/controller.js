@@ -71,7 +71,8 @@ async function getImagesFromCache(property, order) {
 //will return the images according to latest arrival
 exports.home = async (req, res) => {
   const all_images = await getImagesFromCache("postedon", 0);
-  res.render("dashboard", { images: all_images });
+  const entering_user = req.user;
+  res.render("dashboard", { images: all_images, username: entering_user.username, uid: entering_user.id});
 };
 
 //will return images according to upvote count (high - low)
@@ -130,6 +131,7 @@ exports.updateVotes = (req, res, next) => {
 exports.uploads = (req, res, next) => {
   const files = req.files;
   const username = req.body.username;
+
   const caption = req.body.caption;
   if (!files) {
     const error = new Error("please choose files");
@@ -159,7 +161,7 @@ exports.uploads = (req, res, next) => {
     return newUpload
       .save()
       .then(() => {
-        res.redirect("/");
+        res.redirect("/dashboard");
         return { msg: `${file.originalname} Uploaded Successfully..!` };
       })
       .catch((error) => {
