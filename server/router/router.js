@@ -5,6 +5,7 @@ const store = require("../middleware/multer");
 const { ensureAuthenticated, forwardAuthenticated } = require ("../passport/auth");
 //adding the routes to visit the register and login page
 
+route.get("/", (req, res) => res.render ('index'));
 route.get("/register", forwardAuthenticated, (req, res) => res.render('register'));
 route.post("/register", user.register);
 route.get("/signin", forwardAuthenticated, (req, res) => res.render('signin'));
