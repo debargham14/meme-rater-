@@ -310,13 +310,18 @@
             uid: '{{uid}}',
             action: action,
         }
-        
+        let data1 = {
+            action : action,
+            postId: postId
+        }
 
         let imageUpvotedBy = document.getElementById('Upvote-count-' + postId).textContent;
         let imageUpvotedByArray = imageUpvotedBy.split(",");
         
         if(imageUpvotedByArray.includes(data.uid) == false && action == 'Upvote'){
             updatePostStats[action](postId);
+            broadcastVote(data1);
+
             // await axios.post('posts/' + postId + '/act', { action: action, socketId: socketId, uid: data.uid});
             fetch('/posts/' + postId + '/act', {method: 'POST', body:JSON.stringify(data), headers})
             .then(response => response.json())
@@ -329,6 +334,7 @@
         let imageDownvotedByArray = imageDownvotedBy.split(",");
         
         if(imageDownvotedByArray.includes(data.uid) == false && action == 'Downvote'){
+            broadcastVote(data1);
             updatePostStats[action](postId);
              //await axios.post('posts/' + postId + '/act', { action: action, socketId: socketId, uid: data.uid});
              fetch('/posts/' + postId + '/act', {method: 'POST', body:JSON.stringify(data), headers})
@@ -338,6 +344,14 @@
             })
         }
     };
+
+    function broadcastVote(data) {
+        socket.emit('Vote', data);
+    }
+
+    socket.on('Vote', (data) => {
+        updatePostStats[data.action](data.postId);
+    })
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 

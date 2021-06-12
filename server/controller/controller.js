@@ -114,7 +114,6 @@ exports.orderByDownvotes = async (req, res) => {
 exports.updateVotes = (req, res, next) => {
   const action = req.body.action;
   const uid = req.body.uid;
-  console.log(uid);
   if (action == "Upvote") {
     //increment the count of the upvotes
     UploadModel.updateOne(

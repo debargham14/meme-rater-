@@ -110,8 +110,12 @@ let io = require('socket.io')(server);
 io.on ('connection', (socket) => {
    console.log(`New Connection: ${socket.id}`);
    
-   //Receive event
+   //Receive events
    socket.on('comment', (data) => {
       socket.broadcast.emit('comment', data);
+   })
+
+   socket.on('Vote', (data) => {
+     socket.broadcast.emit('Vote', data);
    })
 })
