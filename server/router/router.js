@@ -12,6 +12,7 @@ route.get("/signin", forwardAuthenticated, (req, res) => res.render('signin'));
 route.post("/signin", user.signin);
 route.get("/logout", ensureAuthenticated, user.logout);
 
+
 //routes
 route.get("/dashboard", ensureAuthenticated ,controller.home);
 //maximums 12 images can be posted at a time
@@ -20,4 +21,6 @@ route.post("/posts/:id/act", controller.updateVotes);
 route.get("/orderbyupvotes",  ensureAuthenticated, controller.orderByUpvotes); //route handler for handling the sort by feature based on upvote count on a post (high -low)
 route.get("/orderbydownvotes",  ensureAuthenticated, controller.orderByDownvotes); //route handler for handling the sort by feature based on downvote count on a post (low - high)
 
+//routes for comment
+route.post('/updateComments', controller.updateComments);
 module.exports = route;

@@ -37,6 +37,30 @@
                 font-size: 3.5rem;
             }
         }
+        .collapsible {
+            background-color: #777;
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+            display: table;
+        }
+
+        .active, .collapsible:hover {
+            background-color: #555;
+        }
+
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: visible;
+            background-color: #f1f1f1;
+            width: auto;
+        }
     </style>
 
 </head>
@@ -66,6 +90,7 @@
                     <div class="mb-3">
                         <input type="hidden" name="username" id="username" value = "{{ username }}"required class="form-control">
                     </div>
+    
                     <div class="mb-3">
                         <label for="caption" class="form-label">Caption</label>
                         <textarea class="form-control" id="caption" name="caption" rows="3" required></textarea>
@@ -96,7 +121,7 @@
         {{#each this}}
         {{#if imageSourceUrl}}
         <div class="col-sm-6 col-lg-4 mb-4">
-            <div class="card">
+            <div class="card" style="display: flex; height:fit-content;">
              <img src='{{ this.imageSourceUrl }}' alt="..." style="width: 100%; height: 200">
                 
 
@@ -105,18 +130,62 @@
                     <p class="card-text">{{ this.caption }}
                     </p>
                     <p class="card-text"><small class="text-muted">posted on {{ this.postedon }}</small></p>
-                    <button type="button" onclick="actOnPost(event);" data-post-id="{{ this._id }}"
+                    <button type="button" onclick="actOnPost(event); this.disabled = true;" data-post-id="{{ this._id }}"
                         class="btn btn-outline-primary btn-sm"><i class="fa fa-thumbs-o-up"></i>
                         Upvote </button>
-                    <span id="Upvote-count-{{ this._id }}" class="badge bg-primary">{{ this.upvotes
+                    <span id="Upvote-count-{{ this._id }}" hidden class="badge bg-primary">{{ this.upvotes
                         }}</span>
-                    <button type="button" onclick="actOnPost(event);" data-post-id="{{ this._id }}"
+                    <span id="Upvote-count2-{{ this._id }}"  class="badge bg-primary">{{ this.upvotes.length
+                        }}</span>
+                    <button type="button"  onclick="actOnPost(event); this.disabled = true;" data-post-id="{{ this._id }}"
                         class="btn btn-outline-danger btn-sm">
                         <i class="fa fa-thumbs-o-down"></i>
                         Downvote
                     </button>
-                    <span id="Downvote-count-{{ this._id }}" class="badge bg-danger">{{ this.downvotes
+                    <span id="Downvote-count-{{ this._id }}" hidden class="badge bg-danger">{{ this.downvotes
                         }}</span>
+                      <span id="Downvote-count2-{{ this._id }}"  class="badge bg-danger">{{ this.downvotes.length
+                        }}</span>
+                    {{!-- <div class = "card">     --}}
+                        <div class="row mb-12">
+                            <div class="col-sm-6 col-lg-4 mb-4">
+                                <h4 class="border-bottom pb-2">Comments</h4>
+                            </div>
+                        </div>
+                        <div class = "row mb-12">
+                            <div class="col" style="width: 100%;">
+                                <div class="form-group">
+                                    <label for="">Write a comment</label>
+                                    <textarea id = "textarea-{{ this._id }}"rows="3" class="form-control"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class = "row mb-4">
+                            <div class="col-sm-6 col-lg-4 mb-4">
+                                <button type = "button" onclick="actOnComment(event);" class="btn btn-primary float-right"  data-post-id="{{ this._id }}">Post comment</button>
+                            </div>
+                        </div>
+                        <button type = "button" class = 'collapsible'> show comments </button>
+                        <div class = "content">
+                            <div class="row mb-4">
+                                <div class="col-sm-6 col-lg-4 mb-4">
+                                    <div class="typing text-success"></div>
+                                    <ul class="comment__box-{{ this._id }}">
+                                        {{#each this.comments}}
+                                        <li>
+                                            <div class="col md-6">
+                                
+                                            <h6>{{ this.username }}</h6>
+                                            <p>{{ this.comment }}</p>
+                                        </div>
+                                        </li>
+                                        {{/each}}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    {{!-- </div> --}}
                 </div>
             </div>
         </div>
@@ -127,16 +196,99 @@
     </div>
 
 </main>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.25.3/moment.min.js"></script>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+    coll[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var content = this.nextElementSibling;
+        if (content.style.display === "block") {
+        content.style.display = "none";
+        } else {
+        content.style.display = "block";
+        }
+    });
+}
+</script>
+<script>
+    let socket = io()
+
+    function actOnComment (e) {
+        e.preventDefault();
+        var postId = e.target.dataset.postId;
+        console.log(postId);
+        let textId = "textarea-" + postId;
+        let comment = document.getElementById(textId).value;
+        console.log('comment', comment);
+        if(!comment){
+            return;
+        }
+        postComment(comment, postId);
+    }
+    
+
+    async function postComment(comment, postId) {
+        // Append to dom
+        //Broadcast
+        //sync with mongodb
+        let data = {
+            username: '{{ username }}',
+            uid: '{{ uid }}',
+            comment: comment,
+            postId: postId
+        }
+        appendToDom(data);
+        broadcastComment (data);
+        syncwithDB(data);
+    }
+
+    function appendToDom (data) {
+        let lTag = document.createElement('li');
+        lTag.classList.add('comment', 'mb-6');
+        let markup = `
+            <div class="col md-6">
+                            
+                                <h6>${data.username}</h6>
+                                <p>${data.comment}</p>
+            </div>
+        `;
+        lTag.innerHTML = markup;
+        let commentBox = document.querySelector('.comment__box-' + data.postId);
+        commentBox.prepend(lTag);
+    }
+
+    function broadcastComment (data) {
+        socket.emit('comment', data);
+    }
+    socket.on('comment', (data) => {
+        appendToDom(data)
+    });
+    
+
+    function syncwithDB (data) {
+        const headers = {
+            'Content-Type': 'application/json'
+        }
+        fetch('/updateComments', {method: 'POST', body: JSON.stringify(data), headers})
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+            })
+    }
+</script>
+<script>
+    
     var updatePostStats = {
         Upvote: function (postId) {
-            document.querySelector('#Upvote-count-' + postId).textContent++;
+            document.querySelector('#Upvote-count2-' + postId).textContent++;
         },
         Downvote: function (postId) {
-            let spanId = "Downvote-count-" + postId;
-            document.querySelector('#Downvote-count-' + postId).textContent++;
+            document.querySelector('#Downvote-count2-' + postId).textContent++;
         }
     };
 
@@ -148,39 +300,46 @@
             button.textContent = "Downvote";
         }
     };
-
     var actOnPost = function (event) {
         var postId = event.target.dataset.postId;
         var action = event.target.textContent.replace(/[0-9]/g, '').trim();
-        console.log(action);
-        //console.log(event.target);
-        toggleButtonText[action](event.target);
-        //updatePostStats[action](postId);
-        axios.post('posts/' + postId + '/act', { action: action, socketId: socketId });
+        const headers = {
+            'Content-Type': 'application/json'
+        }
+        let data = {
+            uid: '{{uid}}',
+            action: action,
+        }
+        
+
+        let imageUpvotedBy = document.getElementById('Upvote-count-' + postId).textContent;
+        let imageUpvotedByArray = imageUpvotedBy.split(",");
+        
+        if(imageUpvotedByArray.includes(data.uid) == false && action == 'Upvote'){
+            updatePostStats[action](postId);
+            // await axios.post('posts/' + postId + '/act', { action: action, socketId: socketId, uid: data.uid});
+            fetch('/posts/' + postId + '/act', {method: 'POST', body:JSON.stringify(data), headers})
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+            })
+        }
+        let imageDownvotedBy = document.getElementById('Downvote-count-' + postId).textContent;
+        //console.log(imageDownvotedBy);
+        let imageDownvotedByArray = imageDownvotedBy.split(",");
+        
+        if(imageDownvotedByArray.includes(data.uid) == false && action == 'Downvote'){
+            updatePostStats[action](postId);
+             //await axios.post('posts/' + postId + '/act', { action: action, socketId: socketId, uid: data.uid});
+             fetch('/posts/' + postId + '/act', {method: 'POST', body:JSON.stringify(data), headers})
+            .then(response => response.json())
+            .then(result => {
+                console.log(result);
+            })
+        }
     };
 </script>
 <script src="https://js.pusher.com/4.1/pusher.min.js"></script>
-<script>
-     var pusher = new Pusher('26dd07dc156acae4c8b3', {
-            cluster: 'ap2'
-        });
-        var socketId;
-    
-        // retrieve the socket ID on successful connection
-        pusher.connection.bind('connected', function() {
-            socketId = pusher.connection.socket_id;
-        });
-    
-    
-        var channel = pusher.subscribe('post-events');
-        channel.bind('postAction', function(data) {
-            // log message data to console - for debugging purposes
-            //so the problem lies in fetching the postId of the data 
-            console.log(data);
-            var action = data.action;
-            updatePostStats[action](data.postId);
-        });
-</script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>

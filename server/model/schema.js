@@ -24,19 +24,24 @@ const uploadSchema = new mongoose.Schema({
     required: true,
   },
   upvotes: {
-    type: Number,
+    type: Array,
     required: true,
-    default: 0,
+    default: []
   },
   downvotes: {
-    type: Number,
+    type: Array,
     required: true,
-    default: 0,
+    default: []
   },
   postedon: {
       type: Date,
       default: Date.now(),
-  }
+  },
+
+  comments :{
+    type: Array,
+    default: [],
+  },
 });
 
 module.exports = UploadModel = mongoose.model("uploads", uploadSchema);

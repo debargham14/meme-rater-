@@ -101,6 +101,17 @@ exports.getRedisClient = () => {
 
 //calling routes
 app.use("/", require("./server/router/router"));
-app.listen(port, () =>
+const server = app.listen(port, () =>
   console.log(`Server is stated on http://localhost:${port}`)
 );
+
+let io = require('socket.io')(server);
+
+io.on ('connection', (socket) => {
+   console.log(`New Connection: ${socket.id}`);
+   
+   //Receive event
+   socket.on('comment', (data) => {
+      socket.broadcast.emit('comment', data);
+   })
+})
